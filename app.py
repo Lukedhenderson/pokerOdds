@@ -46,31 +46,49 @@ def has_straight_draw(ranks):
             return True
     return False
 
+# Add this mapping near the top of app.py (or inside the function)
+RANK_MAPPING = {
+    0: "2",
+    1: "3",
+    2: "4",
+    3: "5",
+    4: "6",
+    5: "7",
+    6: "8",
+    7: "9",
+    8: "T",
+    9: "J",
+    10: "Q",
+    11: "K",
+    12: "A"
+}
+
 def analyze_draws(player_hand, community_cards):
     """
     Analyze the hand for flush and straight draw possibilities.
-    Returns a dictionary with flags, number of outs, and an approximate draw probability.
+    Converts eval7 raw ranks to conventional rank strings.
+    Returns a dictionary with flags, outs, and draw probability.
     """
     all_cards = [eval7.Card(card) for card in player_hand + community_cards]
     suits = [card.suit for card in all_cards]
-    # Get ranks; if they are not strings, convert them to strings for uniformity.
     raw_ranks = [card.rank for card in all_cards]
-    # If the first rank is not a string, convert all to strings (for digits, just str(n)).
-    if raw_ranks and not isinstance(raw_ranks[0], str):
-        ranks = [str(r) for r in raw_ranks]
-    else:
-        ranks = raw_ranks
-
+    
+    # Convert raw ranks to conventional rank strings using the mapping.
+    converted_ranks = [RANK_MAPPING.get(r, str(r)) for r in raw_ranks]
+    
+    # Determine if there is a flush draw (exactly 4 cards of one suit)
     flush_draw = any(suits.count(suit) == 4 for suit in set(suits))
-    straight_draw = has_straight_draw(ranks)
-
+    
+    # Use the conventional ranks for straight draw detection.
+    straight_draw = has_straight_draw(converted_ranks)
+    
     outs = 0
     if flush_draw:
-        outs += 9  # Typically 9 outs for a flush draw.
+        outs += 9  # Typical flush draw outs.
     if straight_draw:
-        outs += 8  # Approximate number for an open-ended straight draw.
-
-    # Approximate chance: on the flop (3 community cards), about outs*4%; on the turn (4 cards), about outs*2%.
+        outs += 8  # Typical open-ended straight draw outs.
+    
+    # Calculate draw probability based on community card stage.
     if len(community_cards) == 3:
         draw_probability = outs * 4
     elif len(community_cards) == 4:
@@ -78,6 +96,7 @@ def analyze_draws(player_hand, community_cards):
     else:
         draw_probability = 0
     draw_probability = min(draw_probability, 100)
+    
     return {
         "flush_draw": flush_draw,
         "straight_draw": straight_draw,

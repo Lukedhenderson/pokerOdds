@@ -63,12 +63,23 @@
       })
       .then(response => response.json())
       .then(data => {
+        // Build a human-readable Draw Analysis display
+        let drawAnalysisHTML = '<ul>';
+        drawAnalysisHTML += `<li><strong>Flush Draw:</strong> ${data.draw_analysis.flush_draw ? "Yes" : "No"}</li>`;
+        drawAnalysisHTML += `<li><strong>Straight Draw:</strong> ${data.draw_analysis.straight_draw ? "Yes" : "No"}</li>`;
+        drawAnalysisHTML += `<li><strong>Total Outs:</strong> ${data.draw_analysis.outs}</li>`;
+        drawAnalysisHTML += `<li><strong>Estimated Draw Probability:</strong> ${data.draw_analysis.draw_probability}%</li>`;
+        drawAnalysisHTML += '</ul>';
+
         document.getElementById("results").innerHTML = `
           <p><strong>Win Probability:</strong> ${data.win_probability.toFixed(2)}%</p>
           <p><strong>Break-even Equity:</strong> ${data.break_even_equity.toFixed(2)}%</p>
           <p><strong>EV Decision:</strong> ${data.ev_decision}</p>
           <p><strong>Hand Strength:</strong> ${data.hand_strength}</p>
-          <p><strong>Draw Analysis:</strong> ${JSON.stringify(data.draw_analysis)}</p>
+          <div>
+            <strong>Draw Analysis:</strong>
+            ${drawAnalysisHTML}
+          </div>
         `;
       })
       .catch(error => {
