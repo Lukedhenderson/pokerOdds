@@ -1,7 +1,7 @@
 import random
 import multiprocessing
 import eval7
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -171,6 +171,10 @@ def poker_decision_api():
         "draw_analysis": draw_analysis,
         "hand_strength": hand_strength
     })
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
