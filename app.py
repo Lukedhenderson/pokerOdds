@@ -13,11 +13,15 @@ def calculate_break_even_equity(pot_size, call_amount):
 
 def make_ev_decision(win_probability, break_even_equity, threshold=6):
     """
-    Provide a decision based on EV analysis.
-    If win_probability is strictly greater than (break_even_equity + threshold), return positive EV.
-    If win_probability is at least break_even_equity (but not higher than the threshold above),
-    return marginal; otherwise, fold.
+    Provide a decision based on EV analysis and win probability.
+    First checks if win probability is very high (over 67%).
+    Then compares win probability to break-even equity plus threshold.
     """
+    # If win probability is very high, recommend calling/raising regardless of pot odds
+    if win_probability > 67:
+        return "Call or Raise (Very Strong Hand)"
+    
+    # For other cases, use EV-based decision
     if win_probability > break_even_equity + threshold:
         return "Call or Raise (Positive EV)"
     elif win_probability >= break_even_equity:
