@@ -1,7 +1,7 @@
 import random
 import multiprocessing
 import eval7
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, url_for
 
 app = Flask(__name__)
 
@@ -191,9 +191,23 @@ def poker_decision_api():
         "hand_strength": hand_strength
     })
 
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            values['q'] = random.randint(0, 999999)
+    return url_for(endpoint, **values)
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+app.debug = False

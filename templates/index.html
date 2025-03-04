@@ -3,90 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <title>Poker Odds Calculator</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, button { padding: 8px; font-size: 1em; }
-    .container { max-width: 600px; margin: auto; }
-  </style>
+  <link rel="stylesheet" type="text/css" href="static/css/styles.css">
 </head>
 <body>
+  <nav class="nav-container">
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Home</a>
+      <a href="/about" class="nav-link">About</a>
+    </div>
+    <div class="logo">
+      <img src="static/images/logo.png" alt="Poker Odds Calculator Logo" class="nav-logo">
+    </div>
+  </nav>
   <div class="container">
     <h1>Poker Odds Calculator</h1>
-    <form id="oddsForm">
-      <label for="player_hand">Player Hand (e.g., Ac, Kd):</label><br>
-      <input type="text" id="player_hand" name="player_hand" placeholder="Ac, Kd" required><br><br>
-
-      <label for="community_cards">Community Cards (comma‑separated, 0‑5 cards, e.g., Qs, Jh, Td):</label><br>
-      <input type="text" id="community_cards" name="community_cards" placeholder="Qs, Jh, Td"><br><br>
-
-      <label for="num_opponents">Number of Opponents:</label><br>
-      <input type="number" id="num_opponents" name="num_opponents" value="1" min="1"><br><br>
-
-      <label for="pot_size">Pot Size ($):</label><br>
-      <input type="number" id="pot_size" name="pot_size" value="200" min="1"><br><br>
-
-      <label for="call_amount">Call Amount ($):</label><br>
-      <input type="number" id="call_amount" name="call_amount" value="50" min="0"><br><br>
-
-      <button type="submit">Calculate Odds & Decision</button>
-    </form>
-
-    <h2>Results</h2>
-    <div id="results"></div>
+    <!-- Clear Hand Button -->
+    <button id="clearHandBtn" class="clear-button">Clear Hand</button>
+    
+    <div class="main-content">
+      <!-- Left Column: Game Settings & Quick Entry -->
+      <div class="left-panel">
+        <h2>Game Settings</h2>
+        <div class="quick-hand-entry">
+          <label for="quick_hand_entry">Quick Hand Entry (e.g., AcKd):</label>
+          <input type="text" id="quick_hand_entry" placeholder="AcKd">
+        </div>
+        <div class="quick-comm-entry">
+          <label for="quick_comm_entry">Quick Community Card Entry (e.g., 7h):</label>
+          <input type="text" id="quick_comm_entry" placeholder="e.g., 7h">
+        </div>
+        <div class="setting-group">
+          <label>Number of Opponents:</label>
+          <div class="number-input">
+            <button type="button" id="opp-decrease">-</button>
+            <input type="number" id="num_opponents" value="1" min="1">
+            <button type="button" id="opp-increase">+</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>Pot Size ($):</label>
+          <div class="range-input">
+            <input type="range" id="pot_size_range" min="50" max="1000" step="10" value="200">
+            <span id="pot_size_display">200</span>
+          </div>
+          <div class="preset-buttons">
+            <button type="button" class="preset" data-pot="150" data-call="30">Small Pot</button>
+            <button type="button" class="preset" data-pot="300" data-call="50">Big Pot</button>
+            <button type="button" class="preset" data-pot="500" data-call="500">All-In</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>Call Amount ($):</label>
+          <div class="range-input">
+            <input type="range" id="call_amount_range" min="0" max="500" step="5" value="50">
+            <span id="call_amount_display">50</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Center Column: Card Selection -->
+      <div class="center-panel">
+        <h2>Card Selection</h2>
+        <div class="card-selection">
+          <!-- Your Hand (2 slots) -->
+          <div class="selection-box" id="playerHandBox">
+            <h3>Your Hand</h3>
+            <div id="playerHandSlots">
+              <div class="card-slot" data-index="0"></div>
+              <div class="card-slot" data-index="1"></div>
+            </div>
+          </div>
+          <!-- Community Cards (5 slots) -->
+          <div class="selection-box" id="communityCardsBox">
+            <h3>Community Cards</h3>
+            <div id="communityCardsSlots">
+              <div class="card-slot" data-index="0"></div>
+              <div class="card-slot" data-index="1"></div>
+              <div class="card-slot" data-index="2"></div>
+              <div class="card-slot" data-index="3"></div>
+              <div class="card-slot" data-index="4"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Deck: 13 Representative Cards (one per rank, clubs) -->
+        <div class="deck" id="deck">
+          <!-- Populated via JavaScript -->
+        </div>
+      </div>
+      
+      <!-- Right Column: Results Display -->
+      <div class="right-panel">
+        <h2>Results</h2>
+        <div id="results"></div>
+      </div>
+    </div>
+    
+    <!-- Suit Options Container (for inline suit selection) -->
+    <div id="suitOptionsContainer" class="suit-options-container" style="display:none;"></div>
   </div>
 
-  <script>
-    document.getElementById("oddsForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      // Gather inputs
-      const playerHand = document.getElementById("player_hand").value.split(",").map(s => s.trim());
-      const communityCards = document.getElementById("community_cards").value.split(",")
-                                .map(s => s.trim()).filter(s => s.length > 0);
-      const numOpponents = parseInt(document.getElementById("num_opponents").value);
-      const potSize = parseFloat(document.getElementById("pot_size").value);
-      const callAmount = parseFloat(document.getElementById("call_amount").value);
-
-      const payload = {
-        player_hand: playerHand,
-        community_cards: communityCards,
-        num_opponents: numOpponents,
-        pot_size: potSize,
-        call_amount: callAmount,
-        simulations: 10000
-      };
-
-      fetch("/api/poker_decision", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Build a human-readable Draw Analysis display
-        let drawAnalysisHTML = '<ul>';
-        drawAnalysisHTML += `<li><strong>Flush Draw:</strong> ${data.draw_analysis.flush_draw ? "Yes" : "No"}</li>`;
-        drawAnalysisHTML += `<li><strong>Straight Draw:</strong> ${data.draw_analysis.straight_draw ? "Yes" : "No"}</li>`;
-        drawAnalysisHTML += `<li><strong>Total Outs:</strong> ${data.draw_analysis.outs}</li>`;
-        drawAnalysisHTML += `<li><strong>Estimated Draw Probability:</strong> ${data.draw_analysis.draw_probability}%</li>`;
-        drawAnalysisHTML += '</ul>';
-
-        document.getElementById("results").innerHTML = `
-          <p><strong>Win Probability:</strong> ${data.win_probability.toFixed(2)}%</p>
-          <p><strong>Break-even Equity:</strong> ${data.break_even_equity.toFixed(2)}%</p>
-          <p><strong>EV Decision:</strong> ${data.ev_decision}</p>
-          <p><strong>Hand Strength:</strong> ${data.hand_strength}</p>
-          <div>
-            <strong>Draw Analysis:</strong>
-            ${drawAnalysisHTML}
-          </div>
-        `;
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        document.getElementById("results").innerHTML = "<p>An error occurred.</p>";
-      });
-    });
-  </script>
+  <!-- External JavaScript -->
+  <script src="static/js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,338 @@
+/* Overall styling */
+body {
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #0b3d91, #1e90ff);
+  color: #fff;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* navbar */
+
+.nav-container {
+  height: 70px;
+  width: 100%;
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.8);
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1em;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: #1e90ff;
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* About page specific styles */
+.about-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.about-content section {
+  margin-bottom: 30px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.about-content h2 {
+  color: #1e90ff;
+  margin-bottom: 15px;
+}
+
+.about-content ul,
+.about-content ol {
+  margin-left: 20px;
+  line-height: 1.6;
+}
+
+.about-content li {
+  margin-bottom: 8px;
+}
+
+.container {
+  position: relative;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Clear Hand Button */
+.clear-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #ff4500;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.clear-button:hover {
+  background-color: #ff6347;
+}
+
+h1, h2 {
+  text-align: center;
+  font-family: 'Georgia', serif;
+  text-shadow: 2px 2px 4px #000;
+}
+
+/* Main content layout: Three columns */
+.main-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Left Panel: Game Settings & Quick Entry */
+.left-panel {
+  flex: 1 1 300px;
+  margin-right: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  height: auto;
+}
+
+.left-panel h2 {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+.setting-group, .quick-hand-entry, .quick-comm-entry {
+  margin-bottom: 15px;
+}
+
+.left-panel label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.left-panel input[type="number"],
+.left-panel input[type="range"],
+.left-panel input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  border: none;
+  font-size: 1em;
+}
+
+.number-input {
+  display: flex;
+  align-items: center;
+}
+
+.number-input button {
+  width: 30px;
+  height: 30px;
+  font-size: 1.2em;
+  margin: 0 5px;
+}
+
+.range-input {
+  display: flex;
+  align-items: center;
+}
+
+.range-input input[type="range"] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+/* Preset Buttons: Red and Spaced */
+.preset-buttons {
+  margin-top: 5px;
+}
+.preset-buttons button {
+  margin-right: 5px;
+  padding: 5px 8px;
+  font-size: 0.9em;
+  background-color: #ff0000;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+.preset-buttons button:hover {
+  background-color: #ff4500;
+}
+
+/* Center Panel: Card Selection */
+.center-panel {
+  flex: 2 1 500px;
+}
+
+.center-panel h2 {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+/* Card Selection Area */
+.card-selection {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.selection-box {
+  border: 2px solid #fff;
+  border-radius: 4px;
+  padding: 10px;
+  min-height: 120px;
+  width: 200px;
+  background-color: rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.selection-box h3 {
+  margin-top: 0;
+}
+
+.card-slot {
+  display: inline-block;
+  width: 60px;
+  height: 90px;
+  margin: 5px;
+  border: 2px dashed #fff;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  vertical-align: middle;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+.card-slot.active-slot {
+  border-color: #ff4500;
+  box-shadow: 0 0 10px #ff4500;
+}
+
+/* Deck Styling: 13 Cards Row */
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+}
+
+.deck .deck-card {
+  margin: 5px;
+  cursor: pointer;
+}
+
+.deck .deck-card img {
+  width: 60px;
+  height: 90px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+
+.deck .deck-card:hover img {
+  transform: scale(1.1);
+}
+
+/* Right Panel: Results Display */
+.right-panel {
+  flex: 1 1 300px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  height: auto;
+}
+
+.right-panel h2 {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px auto 0;
+  max-width: 100%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Suit Options Container */
+.suit-options-container {
+  position: absolute;
+  background-color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.suit-options-container .suit-option {
+  width: 60px;
+  height: 90px;
+  margin: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+
+.suit-options-container .suit-option:hover {
+  transform: scale(1.1);
+}
+
+/* Drag and Drop Highlighting */
+.drag-over {
+  border-color: #ff6347;
+}
