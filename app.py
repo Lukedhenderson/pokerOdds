@@ -1,5 +1,4 @@
 import random
-import multiprocessing
 import eval7
 from flask import Flask, request, jsonify, render_template, url_for
 
@@ -115,38 +114,32 @@ def classify_hand_strength(win_probability):
     else:
         return "Drawing Hand"
 
-def simulate_single_run(args):
-    """A single Monte Carlo simulation run."""
-    player_hand, community_cards, num_opponents, remaining_deck = args
-
-    num_missing_community = 5 - len(community_cards)
-    sampled_cards = random.sample(remaining_deck, num_opponents * 2 + num_missing_community)
-    opponent_hands = [sampled_cards[i:i+2] for i in range(0, num_opponents * 2, 2)]
-    completed_community = community_cards + sampled_cards[num_opponents * 2:]
-
-    player_score = eval7.evaluate([eval7.Card(card) for card in (player_hand + completed_community)])
-    opponent_scores = [
-        eval7.evaluate([eval7.Card(card) for card in (opp + completed_community)])
-        for opp in opponent_hands
-    ]
-
-    return all(player_score >= opp_score for opp_score in opponent_scores)
-
-def monte_carlo_simulation(player_hand, community_cards, num_opponents, simulations=10000):
-    """Estimate win probability using Monte Carlo simulation."""
+def monte_carlo_simulation(player_hand, community_cards, num_opponents, simulations=1000):
+    """Estimate win probability using Monte Carlo simulation (single process version)."""
     deck = [r + s for r in '23456789TJQKA' for s in 'cdhs']
     input_cards = player_hand + community_cards
     if len(set(input_cards)) != len(input_cards):
         raise ValueError("Duplicate cards detected in input.")
     known_cards = set(input_cards)
     remaining_deck = [card for card in deck if card not in known_cards]
-
-    args = [
-        (player_hand, community_cards, num_opponents, remaining_deck[:])
-        for _ in range(simulations)
-    ]
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
-        wins = sum(pool.map(simulate_single_run, args))
+    
+    wins = 0
+    for _ in range(simulations):
+        # Sample cards for opponents and remaining community cards
+        sampled_cards = random.sample(remaining_deck, num_opponents * 2 + (5 - len(community_cards)))
+        opponent_hands = [sampled_cards[i:i+2] for i in range(0, num_opponents * 2, 2)]
+        completed_community = community_cards + sampled_cards[num_opponents * 2:]
+        
+        # Convert cards to eval7 format and evaluate
+        player_score = eval7.evaluate([eval7.Card(card) for card in (player_hand + completed_community)])
+        opponent_scores = [
+            eval7.evaluate([eval7.Card(card) for card in (opp + completed_community)])
+            for opp in opponent_hands
+        ]
+        
+        if all(player_score >= opp_score for opp_score in opponent_scores):
+            wins += 1
+            
     return wins / simulations
 
 @app.route('/api/poker_decision', methods=['POST'])
@@ -159,37 +152,40 @@ def poker_decision_api():
       - Draw analysis (outs and probability)
       - Hand strength classification
     """
-    data = request.json
-    player_hand = data.get("player_hand", [])
-    community_cards = data.get("community_cards", [])
-    num_opponents = data.get("num_opponents", 1)
-    pot_size = data.get("pot_size", 100)
-    call_amount = data.get("call_amount", 20)
-    simulations = data.get("simulations", 10000)
+    try:
+        data = request.json
+        player_hand = data.get("player_hand", [])
+        community_cards = data.get("community_cards", [])
+        num_opponents = data.get("num_opponents", 1)
+        pot_size = data.get("pot_size", 100)
+        call_amount = data.get("call_amount", 20)
+        simulations = min(data.get("simulations", 1000), 1000)  # Cap at 1000 simulations
 
-    valid_deck = {r+s for r in '23456789TJQKA' for s in 'cdhs'}
-    for card in player_hand + community_cards:
-        if card not in valid_deck:
-            return jsonify({"error": "Invalid card detected: " + card}), 400
+        valid_deck = {r+s for r in '23456789TJQKA' for s in 'cdhs'}
+        for card in player_hand + community_cards:
+            if card not in valid_deck:
+                return jsonify({"error": "Invalid card detected: " + card}), 400
 
-    if len(player_hand) != 2:
-        return jsonify({"error": "Player hand must have exactly 2 cards."}), 400
-    if not (0 <= len(community_cards) <= 5):
-        return jsonify({"error": "Community cards must be between 0 and 5."}), 400
+        if len(player_hand) != 2:
+            return jsonify({"error": "Player hand must have exactly 2 cards."}), 400
+        if not (0 <= len(community_cards) <= 5):
+            return jsonify({"error": "Community cards must be between 0 and 5."}), 400
 
-    win_probability = monte_carlo_simulation(player_hand, community_cards, num_opponents, simulations) * 100
-    break_even_equity = calculate_break_even_equity(pot_size, call_amount)
-    ev_decision = make_ev_decision(win_probability, break_even_equity)
-    draw_analysis = analyze_draws(player_hand, community_cards)
-    hand_strength = classify_hand_strength(win_probability)
+        win_probability = monte_carlo_simulation(player_hand, community_cards, num_opponents, simulations) * 100
+        break_even_equity = calculate_break_even_equity(pot_size, call_amount)
+        ev_decision = make_ev_decision(win_probability, break_even_equity)
+        draw_analysis = analyze_draws(player_hand, community_cards)
+        hand_strength = classify_hand_strength(win_probability)
 
-    return jsonify({
-        "win_probability": win_probability,
-        "break_even_equity": break_even_equity,
-        "ev_decision": ev_decision,
-        "draw_analysis": draw_analysis,
-        "hand_strength": hand_strength
-    })
+        return jsonify({
+            "win_probability": win_probability,
+            "break_even_equity": break_even_equity,
+            "ev_decision": ev_decision,
+            "draw_analysis": draw_analysis,
+            "hand_strength": hand_strength
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.context_processor
 def override_url_for():
